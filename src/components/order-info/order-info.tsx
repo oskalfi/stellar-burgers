@@ -1,21 +1,37 @@
-import { FC, useMemo } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { Preloader } from '../ui/preloader';
 import { OrderInfoUI } from '../ui/order-info';
 import { TIngredient } from '@utils-types';
+import { useSelector } from '../../services/store';
+import { getOrdersData } from '../../services/slices/allOrdersSlice';
+import { useParams } from 'react-router-dom';
+import { getAllIngredients } from '../../services/slices/ingredientsSlice';
+import { getUserOrdersHistory } from '../../services/slices/userOrdersSlice';
+import { getOrderByNumberApi } from '@api';
 
 export const OrderInfo: FC = () => {
-  /** TODO: взять переменные orderData и ingredients из стора */
-  const orderData = {
-    createdAt: '',
-    ingredients: [],
-    _id: '',
-    status: '',
-    name: '',
-    updatedAt: 'string',
-    number: 0
+  const { number } = useParams();
+  const order = useSelector(getOrdersData).find(
+    (order) => order.number === Number(number)
+  ); // получу данные заказа из массива, который прислал сервер
+  const [orderData, setOrderData] = useState(order); // запишу их в state
+  const ingredients: TIngredient[] = useSelector(getAllIngredients); // возьму все ингредиенты
+
+  // функция, которую буду вызывать если заказ не был найден в массиве, который прислал сервер при инициализации приложения
+  const fetchOrder = async () => {
+    // функция, которая делает запрос на получение заказа по номеру, и сохраняет этот заказ в state
+    const res = await getOrderByNumberApi(Number(number));
+    if (res.success) {
+      setOrderData(res.orders[0]);
+    }
   };
 
-  const ingredients: TIngredient[] = [];
+  useEffect(() => {
+    // если заказ не был найден в массиве заказов, то запрошу его отдельно с сервера
+    if (!orderData) {
+      fetchOrder();
+    }
+  }, []);
 
   /* Готовим данные для отображения */
   const orderInfo = useMemo(() => {

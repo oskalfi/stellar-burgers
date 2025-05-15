@@ -1,11 +1,27 @@
 import { ProfileUI } from '@ui-pages';
-import { FC, SyntheticEvent, useEffect, useState } from 'react';
+import { FC, SyntheticEvent, useEffect, useMemo, useState } from 'react';
+import { useDispatch, useSelector } from '../../services/store';
+import {
+  clearErrorText,
+  clearSuccessText,
+  getErrorText,
+  getSuccessText,
+  getUserEmail,
+  getUserName,
+  updateUserData
+} from '../../services/slices/userAuthSlice';
 
 export const Profile: FC = () => {
-  /** TODO: взять переменную из стора */
+  const dispatch = useDispatch();
+
+  const userName = useSelector(getUserName);
+  const userEmail = useSelector(getUserEmail);
+  const errorText = useSelector(getErrorText);
+  const successText = useSelector(getSuccessText);
+
   const user = {
-    name: '',
-    email: ''
+    name: userName,
+    email: userEmail
   };
 
   const [formValue, setFormValue] = useState({
@@ -20,7 +36,9 @@ export const Profile: FC = () => {
       name: user?.name || '',
       email: user?.email || ''
     }));
-  }, [user]);
+    dispatch(clearSuccessText());
+    dispatch(clearErrorText());
+  }, [userName, userEmail, dispatch]);
 
   const isFormChanged =
     formValue.name !== user?.name ||
@@ -29,6 +47,11 @@ export const Profile: FC = () => {
 
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
+    dispatch(updateUserData(formValue));
+    setFormValue((prevState) => ({
+      ...prevState,
+      password: ''
+    }));
   };
 
   const handleCancel = (e: SyntheticEvent) => {
@@ -54,8 +77,8 @@ export const Profile: FC = () => {
       handleCancel={handleCancel}
       handleSubmit={handleSubmit}
       handleInputChange={handleInputChange}
+      updateUserError={errorText}
+      updateUserSuccess={successText}
     />
   );
-
-  return null;
 };

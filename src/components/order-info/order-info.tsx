@@ -4,9 +4,8 @@ import { OrderInfoUI } from '../ui/order-info';
 import { TIngredient } from '@utils-types';
 import { useSelector } from '../../services/store';
 import { getOrdersData } from '../../services/slices/allOrdersSlice';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { getAllIngredients } from '../../services/slices/ingredientsSlice';
-import { getUserOrdersHistory } from '../../services/slices/userOrdersSlice';
 import { getOrderByNumberApi } from '@api';
 
 export const OrderInfo: FC = () => {
@@ -32,6 +31,10 @@ export const OrderInfo: FC = () => {
       fetchOrder();
     }
   }, []);
+
+  // добавлю отступ сверху для заказа, который открыли по прямой ссылке
+  const location = useLocation();
+  const isInModal = location.state?.background ? true : false;
 
   /* Готовим данные для отображения */
   const orderInfo = useMemo(() => {
@@ -79,5 +82,5 @@ export const OrderInfo: FC = () => {
     return <Preloader />;
   }
 
-  return <OrderInfoUI orderInfo={orderInfo} />;
+  return <OrderInfoUI orderInfo={orderInfo} isInModal={isInModal} />;
 };

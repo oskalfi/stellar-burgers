@@ -2,27 +2,29 @@ import {
   getUserApi,
   loginUserApi,
   registerUserApi,
+  TAuthResponse,
   TLoginData,
   TRegisterData,
   updateUserApi
 } from '@api';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { TUser } from '@utils-types';
-import { deleteCookie, getCookie, setCookie } from '../../utils/cookie';
+import { getCookie, setCookie } from '../../utils/cookie';
 
-export const registerAttempt = createAsyncThunk(
-  'userAuth/register',
-  async (data: TRegisterData, thunkAPI) => {
-    try {
-      const userData = await registerUserApi(data);
-      setCookie('accessToken', userData.accessToken, { expires: 1200 });
-      localStorage.setItem('refreshToken', userData.refreshToken);
-      return userData;
-    } catch (err) {
-      return thunkAPI.rejectWithValue('Регистрация не удалась');
-    }
+export const registerAttempt = createAsyncThunk<
+  TAuthResponse,
+  TRegisterData,
+  { rejectValue: string }
+>('userAuth/register', async (data: TRegisterData, thunkAPI) => {
+  try {
+    const userData = await registerUserApi(data);
+    setCookie('accessToken', userData.accessToken, { expires: 1200 });
+    localStorage.setItem('refreshToken', userData.refreshToken);
+    return userData;
+  } catch (err) {
+    return thunkAPI.rejectWithValue('Регистрация не удалась');
   }
-);
+});
 
 export const checkUserAuth = createAsyncThunk('userAuth/check', async () => {
   if (getCookie('accessToken')) {
@@ -32,11 +34,17 @@ export const checkUserAuth = createAsyncThunk('userAuth/check', async () => {
   throw new Error('Отсутствует токен');
 });
 
-export const tryLoginUser = createAsyncThunk(
+export const tryLoginUser = createAsyncThunk<TAuthResponse, TLoginData>(
   'userAuth/login',
-  async (data: TLoginData) => {
-    const res = await loginUserApi(data);
-    return res;
+  async (data: TLoginData, thunkAPI) => {
+    try {
+      const res = await loginUserApi(data);
+      setCookie('accessToken', res.accessToken, { expires: 1200 });
+      localStorage.setItem('refreshToken', res.refreshToken);
+      return res;
+    } catch (error) {
+      return thunkAPI.rejectWithValue('Ошибка авторизации');
+    }
   }
 );
 
@@ -67,8 +75,6 @@ export const userAuthSlice = createSlice({
   initialState,
   reducers: {
     logout: (state) => {
-      deleteCookie('accessToken');
-      localStorage.removeItem('refreshToken');
       state.isAuth = false;
       state.name = '';
       state.email = '';
@@ -88,12 +94,10 @@ export const userAuthSlice = createSlice({
     builder.addCase(registerAttempt.fulfilled, (state, action) => {
       state.email = action.payload.user.email;
       state.name = action.payload.user.name;
-      setCookie('accessToken', action.payload.accessToken, { expires: 1200 });
-      localStorage.setItem('refreshToken', action.payload.refreshToken);
       state.isAuth = true;
     });
     builder.addCase(registerAttempt.rejected, (state, action) => {
-      console.error('ошибка', action.error.message);
+      state.errorText = `${action.payload}. Возможно, аккаунт с таким адресом уже используется`;
     });
     builder.addCase(checkUserAuth.pending, (state) => {});
     builder.addCase(checkUserAuth.fulfilled, (state, action) => {
@@ -110,12 +114,10 @@ export const userAuthSlice = createSlice({
     builder.addCase(tryLoginUser.fulfilled, (state, action) => {
       state.email = action.payload.user.email;
       state.name = action.payload.user.name;
-      setCookie('accessToken', action.payload.accessToken, { expires: 1200 });
-      localStorage.setItem('refreshToken', action.payload.refreshToken);
       state.isAuth = true;
     });
     builder.addCase(tryLoginUser.rejected, (state, action) => {
-      state.errorText = 'Адрес электронной почты или пароль указаны неверно';
+      state.errorText = 'Неверный пароль или адрес электронной почты';
     });
     builder.addCase(updateUserData.pending, (state) => {});
     builder.addCase(updateUserData.fulfilled, (state, action) => {

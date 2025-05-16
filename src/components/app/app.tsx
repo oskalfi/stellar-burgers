@@ -12,13 +12,7 @@ import {
 import '../../index.css';
 import styles from './app.module.css';
 
-import {
-  AppHeader,
-  FeedInfo,
-  IngredientDetails,
-  Modal,
-  OrderInfo
-} from '@components';
+import { AppHeader, IngredientDetails, Modal, OrderInfo } from '@components';
 
 import {
   Routes,
@@ -37,7 +31,6 @@ import {
   userIsAuth
 } from '../../services/slices/userAuthSlice';
 
-// eslint-disable-next-line arrow-body-style
 const App = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -46,7 +39,13 @@ const App = () => {
   const isAuth = useSelector(userIsAuth);
   const authChecked = useSelector(isAuthChecked);
 
-  const onClick = () => navigate(-1);
+  const onClick = () => {
+    if (backgroundLocation?.pathname) {
+      navigate(backgroundLocation.pathname, { replace: true });
+    } else {
+      navigate(-1);
+    }
+  };
 
   useEffect(() => {
     dispatch(checkUserAuth());
@@ -72,7 +71,7 @@ const App = () => {
           element={
             <ProtectedRoute
               isAuth={isAuth}
-              redirectPath='/profile'
+              redirectPath='/'
               authChecked={authChecked}
             >
               <Login />
@@ -142,7 +141,18 @@ const App = () => {
               </ProtectedRoute>
             }
           />
-          <Route path='orders/:number' element={<OrderInfo />} />
+          <Route
+            path='orders/:number'
+            element={
+              <ProtectedRoute
+                isAuth={!isAuth}
+                redirectPath='/'
+                authChecked={authChecked}
+              >
+                <OrderInfo />
+              </ProtectedRoute>
+            }
+          />
         </Route>
       </Routes>
       {backgroundLocation && (
@@ -158,7 +168,7 @@ const App = () => {
           <Route
             path={'/feed/:number'}
             element={
-              <Modal onClose={onClick} title={'Детали ингредиента'}>
+              <Modal onClose={onClick} title={'Детали заказа'}>
                 <OrderInfo />
               </Modal>
             }
@@ -166,7 +176,7 @@ const App = () => {
           <Route
             path='/profile/orders/:number'
             element={
-              <Modal onClose={onClick} title={'Детали ингредиента'}>
+              <Modal onClose={onClick} title={'Детали заказа'}>
                 <OrderInfo />
               </Modal>
             }

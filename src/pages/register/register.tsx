@@ -1,22 +1,26 @@
 import { FC, SyntheticEvent, useEffect, useState } from 'react';
 import { RegisterUI } from '@ui-pages';
-import { useDispatch } from '../../services/store';
-import { registerAttempt } from '../../services/slices/userAuthSlice';
+import { useDispatch, useSelector } from '../../services/store';
+import {
+  getErrorText,
+  registerAttempt,
+  setErrorText
+} from '../../services/slices/userAuthSlice';
 
 export const Register: FC = () => {
   const [userName, setUserName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errorText, setErrorText] = useState('');
+  const errorText = useSelector(getErrorText);
 
   const dispatch = useDispatch();
 
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
     if (userName.length === 0 || email.length === 0 || password.length === 0) {
-      setErrorText('Заполните все поля формы');
+      dispatch(setErrorText('Заполните все поля формы'));
     } else {
-      setErrorText('');
+      dispatch(setErrorText(''));
       const data = {
         name: userName,
         email: email,

@@ -11,9 +11,15 @@ export const ModalUI: FC<TModalUIProps> = memo(
     <>
       <div className={styles.modal}>
         <div className={styles.header}>
-          <h3 className={`${styles.title} text text_type_main-large`}>
-            {title}
-          </h3>
+          {!isNaN(Number(title)) ? (
+            <h3 className={`text text_type_digits-default ${styles.title}`}>
+              #{String(title).padStart(6, '0')}
+            </h3>
+          ) : (
+            <h3 className={`${styles.title} text text_type_main-large`}>
+              {title}
+            </h3>
+          )}
           <button className={styles.button} type='button'>
             <CloseIcon type='primary' onClick={onClose} />
           </button>

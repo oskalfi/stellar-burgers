@@ -129,7 +129,12 @@ export const getOrderByNumberApi = (number: number) =>
     headers: {
       'Content-Type': 'application/json'
     }
-  }).then((res) => checkResponse<TOrderResponse>(res));
+  })
+    .then((res) => checkResponse<TOrderResponse>(res))
+    .then((data) => {
+      if (data?.success) return data;
+      return Promise.reject(data);
+    });
 
 export type TRegisterData = {
   email: string;
@@ -137,7 +142,7 @@ export type TRegisterData = {
   password: string;
 };
 
-type TAuthResponse = TServerResponse<{
+export type TAuthResponse = TServerResponse<{
   refreshToken: string;
   accessToken: string;
   user: TUser;
@@ -209,7 +214,7 @@ type TUserResponse = TServerResponse<{ user: TUser }>;
 export const getUserApi = () =>
   fetchWithRefresh<TUserResponse>(`${URL}/auth/user`, {
     headers: {
-      authorization: getCookie('accessToken')
+      Authorization: getCookie('accessToken')
     } as HeadersInit
   });
 

@@ -46,3 +46,8 @@
   color: #ff0000;
   text-align: center;
 }
+
+.success {
+  color: lawngreen;
+  text-align: center;
+}

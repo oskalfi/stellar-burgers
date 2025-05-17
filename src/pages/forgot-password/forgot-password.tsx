@@ -1,30 +1,41 @@
 import { FC, useState, SyntheticEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 import { forgotPasswordApi } from '@api';
 import { ForgotPasswordUI } from '@ui-pages';
+import { useSelector } from '../../services/store';
+import { isAuthChecked, userIsAuth } from '../../services/slices/userAuthSlice';
+import { Preloader } from '@ui';
 
 export const ForgotPassword: FC = () => {
+  const isAuth = useSelector(userIsAuth);
+  const isUserAuthChecked = useSelector(isAuthChecked);
+
   const [email, setEmail] = useState('');
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<string>('');
 
   const navigate = useNavigate();
 
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
-
-    setError(null);
-    forgotPasswordApi({ email })
-      .then(() => {
-        localStorage.setItem('resetPassword', 'true');
-        navigate('/reset-password', { replace: true });
-      })
-      .catch((err) => setError(err));
+    if (!email) setError('Напишите адрес электронной почты');
+    else {
+      forgotPasswordApi({ email })
+        .then(() => {
+          localStorage.setItem('resetPassword', 'true');
+          navigate('/reset-password', { replace: true });
+        })
+        .catch((err) => setError(err));
+    }
   };
 
-  return (
+  if (!isUserAuthChecked) return <Preloader />;
+
+  return isAuth ? (
+    <Navigate to='/' />
+  ) : (
     <ForgotPasswordUI
-      errorText={error?.message}
+      errorText={error}
       email={email}
       setEmail={setEmail}
       handleSubmit={handleSubmit}

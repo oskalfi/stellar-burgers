@@ -3,11 +3,18 @@ import { RegisterUI } from '@ui-pages';
 import { useDispatch, useSelector } from '../../services/store';
 import {
   getErrorText,
+  isAuthChecked,
   registerAttempt,
-  setErrorText
+  setErrorText,
+  userIsAuth
 } from '../../services/slices/userAuthSlice';
+import { Preloader } from '@ui';
+import { Navigate } from 'react-router-dom';
 
 export const Register: FC = () => {
+  const isAuth = useSelector(userIsAuth);
+  const isUserAuthChecked = useSelector(isAuthChecked);
+
   const [userName, setUserName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -30,7 +37,13 @@ export const Register: FC = () => {
     }
   };
 
-  return (
+  if (!isUserAuthChecked) {
+    return <Preloader />;
+  }
+
+  return isAuth ? (
+    <Navigate to='/' />
+  ) : (
     <RegisterUI
       errorText={errorText}
       email={email}

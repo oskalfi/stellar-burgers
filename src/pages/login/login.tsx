@@ -3,30 +3,50 @@ import { LoginUI } from '@ui-pages';
 import { useDispatch, useSelector } from '../../services/store';
 import {
   getErrorText,
+  isAuthChecked,
   setErrorText,
-  tryLoginUser
+  tryLoginUser,
+  userIsAuth
 } from '../../services/slices/userAuthSlice';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Preloader } from '@ui';
 
 export const Login: FC = () => {
+  const isAuth = useSelector(userIsAuth);
+  const isUserAuthChecked = useSelector(isAuthChecked);
+
   const dispatch = useDispatch();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const errorText = useSelector(getErrorText);
 
-  const handleSubmit = (e: SyntheticEvent) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || 'profile';
+
+  const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
-    if (email.length === 0 || password.length === 0) {
+
+    if (!email || !password) {
       dispatch(setErrorText('Заполните все поля формы!'));
-    } else {
-      const data = {
-        email: email,
-        password: password
-      };
-      dispatch(tryLoginUser(data));
+      return;
+    }
+
+    try {
+      await dispatch(tryLoginUser({ email, password })).unwrap();
+      navigate(location.state?.from?.pathname || '/', { replace: true });
+    } catch {
+      dispatch(setErrorText('Ошибка авторизации. Проверьте данные.'));
     }
   };
 
-  return (
+  if (!isUserAuthChecked) {
+    return null;
+  }
+
+  return isAuth ? (
+    <Navigate to='/' />
+  ) : (
     <LoginUI
       errorText={errorText}
       email={email}

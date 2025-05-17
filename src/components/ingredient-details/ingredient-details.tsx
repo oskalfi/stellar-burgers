@@ -3,13 +3,29 @@ import { Preloader } from '../ui/preloader';
 import { IngredientDetailsUI } from '../ui/ingredient-details';
 import { getAllIngredients } from '../../services/slices/ingredientsSlice';
 import { useSelector } from '../../services/store';
-import { useLocation, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Modal } from '../modal';
 
-export const IngredientDetails: FC = () => {
-  const location = useLocation();
-  const isInModal = location.state?.background ? true : false;
+type TIngredientDetailsProps = {
+  isInModal?: boolean;
+};
 
+export const IngredientDetails: FC<TIngredientDetailsProps> = ({
+  isInModal
+}) => {
   const { id } = useParams();
+
+  const navigate = useNavigate();
+  const location = useLocation();
+  const backgroundLocation = location.state?.background;
+
+  const onClick = () => {
+    if (backgroundLocation?.pathname) {
+      navigate(backgroundLocation.pathname, { replace: true });
+    } else {
+      navigate(-1);
+    }
+  };
 
   const ingredientData = useSelector(getAllIngredients).find(
     (ingredient) => ingredient._id === id
@@ -19,7 +35,14 @@ export const IngredientDetails: FC = () => {
     return <Preloader />;
   }
 
-  return (
+  return isInModal ? (
+    <Modal onClose={onClick} title={'Детали ингредиента'}>
+      <IngredientDetailsUI
+        ingredientData={ingredientData}
+        isInModal={isInModal}
+      />
+    </Modal>
+  ) : (
     <IngredientDetailsUI
       ingredientData={ingredientData}
       isInModal={isInModal}

@@ -4,12 +4,28 @@ import { OrderInfoUI } from '../ui/order-info';
 import { TIngredient } from '@utils-types';
 import { useSelector } from '../../services/store';
 import { getOrdersData } from '../../services/slices/allOrdersSlice';
-import { useLocation, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { getAllIngredients } from '../../services/slices/ingredientsSlice';
 import { getOrderByNumberApi } from '@api';
+import { Modal } from '../modal';
 
-export const OrderInfo: FC = () => {
-  const { number } = useParams();
+type TORderInfoProps = {
+  isInModal?: boolean;
+};
+
+export const OrderInfo: FC<TORderInfoProps> = ({ isInModal }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const backgroundLocation = location.state?.background;
+  const onClick = () => {
+    if (backgroundLocation?.pathname) {
+      navigate(backgroundLocation.pathname, { replace: true });
+    } else {
+      navigate(-1);
+    }
+  };
+
+  const { number } = useParams() as { number: string };
   const order = useSelector(getOrdersData).find(
     (order) => order.number === Number(number)
   ); // получу данные заказа из массива, который прислал сервер
@@ -31,10 +47,6 @@ export const OrderInfo: FC = () => {
       fetchOrder();
     }
   }, []);
-
-  // добавлю отступ сверху для заказа, который открыли по прямой ссылке
-  const location = useLocation();
-  const isInModal = location.state?.background ? true : false;
 
   /* Готовим данные для отображения */
   const orderInfo = useMemo(() => {
@@ -78,9 +90,17 @@ export const OrderInfo: FC = () => {
     };
   }, [orderData, ingredients]);
 
-  if (!orderInfo) {
-    return <Preloader />;
-  }
-
-  return <OrderInfoUI orderInfo={orderInfo} isInModal={isInModal} />;
+  return isInModal ? (
+    <Modal onClose={onClick} title={number}>
+      {orderInfo ? (
+        <OrderInfoUI orderInfo={orderInfo} isInModal={isInModal} />
+      ) : (
+        <Preloader />
+      )}
+    </Modal>
+  ) : orderInfo ? (
+    <OrderInfoUI orderInfo={orderInfo} isInModal={isInModal} />
+  ) : (
+    <Preloader />
+  );
 };

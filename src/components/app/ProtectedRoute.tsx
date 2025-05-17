@@ -1,19 +1,24 @@
 import { Preloader } from '@ui';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 
 type ProtectedRouteProps = {
   children: React.ReactElement;
   isAuth: boolean;
-  redirectPath: string;
   authChecked: boolean;
 };
 
 export const ProtectedRoute = ({
   children,
   isAuth,
-  redirectPath,
   authChecked
 }: ProtectedRouteProps) => {
+  const location = useLocation();
+
   if (!authChecked) return <Preloader />;
-  return !isAuth ? children : <Navigate to={redirectPath} />;
+
+  return isAuth ? (
+    children
+  ) : (
+    <Navigate to='/login' state={{ from: location }} replace />
+  );
 };

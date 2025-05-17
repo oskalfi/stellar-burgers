@@ -13,8 +13,8 @@ export const OrderInfoUI: FC<OrderInfoUIProps> = memo(
   ({ orderInfo, isInModal }) => (
     <div className={styles.wrap}>
       {!isInModal ? (
-        <h3 className={`${styles.title} text text_type_main-large`}>
-          {`Заказ #${orderInfo.number}`}
+        <h3 className={`text text_type_digits-default ${styles.title}`}>
+          #{String(orderInfo.number).padStart(6, '0')}
         </h3>
       ) : null}
       <h3 className={`text text_type_main-medium pb-3 pt-10 ${styles.header}`}>

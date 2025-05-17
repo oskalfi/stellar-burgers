@@ -7,11 +7,11 @@ import { TModalUIProps } from './type';
 import { ModalOverlayUI } from '@ui';
 
 export const ModalUI: FC<TModalUIProps> = memo(
-  ({ title, onClose, children }) => (
+  ({ title = '', onClose, children }) => (
     <>
       <div className={styles.modal}>
         <div className={styles.header}>
-          {!isNaN(Number(title)) ? (
+          {title !== '' && !isNaN(Number(title)) ? (
             <h3 className={`text text_type_digits-default ${styles.title}`}>
               #{String(title).padStart(6, '0')}
             </h3>

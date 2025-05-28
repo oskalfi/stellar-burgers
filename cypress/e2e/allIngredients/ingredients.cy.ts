@@ -1,9 +1,9 @@
 describe('Отображение всего списка ингредиентов', () => {
-  it('Проверка отрисовки замоканного списка ингредиентов', () => {
-    // Загружаем моковые данные из fixtures
+  it('Все поданные ингредиенты отображаются', () => {
+    // Загрузка моковых данных из fixtures чтобы ими разрешить GET-запрос
     cy.fixture('ingredients').then((mockIngredients) => {
       // Перехватываем GET-запрос
-      cy.intercept('GET', 'https://norma.nomoreparties.space/api/ingredients', {
+      cy.intercept('GET', 'api/ingredients', {
         statusCode: 200,
         body: mockIngredients
       }).as('getIngredients');
@@ -15,12 +15,10 @@ describe('Отображение всего списка ингредиенто�
       cy.wait('@getIngredients');
 
       // Проверяем, что данные действительно отобразились
-      cy.fixture('ingredients').then((mockIngredients) => {
-        cy.get('[data-cy="ingredient-card"]').should(
-          'have.length',
-          mockIngredients.data.length
-        );
-      });
+      cy.get('[data-cy="ingredient-card"]').should(
+        'have.length',
+        mockIngredients.data.length
+      );
     });
   });
 });

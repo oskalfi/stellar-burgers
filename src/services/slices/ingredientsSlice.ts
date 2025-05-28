@@ -6,33 +6,20 @@ import {
 } from '@reduxjs/toolkit';
 import { TIngredient } from '@utils-types';
 
-// type TIngredient<T> = {
-//   _id: string;
-//   name: string;
-//   type: T;
-//   proteins: number;
-//   fat: number;
-//   carbohydrates: number;
-//   calories: number;
-//   price: number;
-//   image: string;
-//   image_mobile: string;
-//   image_large: string;
-//   __v: number;
-// };
-
 type TIngredientsState = {
   buns: TIngredient[];
   mains: TIngredient[];
   sauces: TIngredient[];
   loading: boolean;
+  error: string | null;
 };
 
 const initialState: TIngredientsState = {
   buns: [],
   mains: [],
   sauces: [],
-  loading: false
+  loading: false,
+  error: null
 };
 
 export const fetchIngredients = createAsyncThunk(
@@ -69,7 +56,7 @@ export const ingredientsSlice = createSlice({
     });
     builder.addCase(fetchIngredients.rejected, (state, action) => {
       state.loading = false;
-      console.error(action.payload);
+      state.error = action.error.message || 'Произошла ошибка';
     });
   },
   selectors: {

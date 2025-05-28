@@ -14,11 +14,12 @@ export const fetchAllOrders = createAsyncThunk(
   }
 );
 
-const initialState: TOrdersData & { loading: boolean } = {
+const initialState: TOrdersData & { loading: boolean; error: string | null } = {
   orders: [],
   total: 0,
   totalToday: 0,
-  loading: false
+  loading: false,
+  error: null
 };
 
 export const allOrdersSlice = createSlice({
@@ -37,7 +38,7 @@ export const allOrdersSlice = createSlice({
     });
     builder.addCase(fetchAllOrders.rejected, (state, action) => {
       state.loading = false;
-      console.error(action.payload);
+      state.error = action.error.message || 'Произошла ошибка';
     });
   },
   selectors: {

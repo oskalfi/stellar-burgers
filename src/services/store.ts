@@ -10,7 +10,7 @@ import {
   useSelector as selectorHook
 } from 'react-redux';
 
-const rootReducer = combineSlices(
+export const rootReducer = combineSlices(
   ingredientsSlice,
   userOrdersSlice,
   allOrdersSlice,
@@ -28,3 +28,8 @@ export type AppDispatch = typeof store.dispatch;
 
 export const useDispatch: () => AppDispatch = () => dispatchHook();
 export const useSelector: TypedUseSelectorHook<RootState> = selectorHook;
+
+if (process.env.NODE_ENV === 'development') {
+  // для Cypress
+  (window as any).__REDUX_STORE__ = store;
+}

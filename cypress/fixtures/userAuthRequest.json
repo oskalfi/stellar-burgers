@@ -1,0 +1,9 @@
+{
+  "success": true,
+  "accessToken": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4MjQ5ZTRjYzJmMzBjMDAxY2IyMzlhMiIsImlhdCI6MTc0ODI2OTc4MiwiZXhwIjoxNzQ4MjcwOTgyfQ.1lE2H9NJLCjUUeVsquY43ghv3QblnWjN7Khy92oZkBc",
+  "refreshToken": "0babbd1e41c4037ec29c3cbc0861772e3edf226977e6edb89b68e450f18e5de7eeb4dc1952f7494b",
+  "user": {
+    "email": "stadnikov.adam@gmail.com",
+    "name": "Адамыч"
+  }
+}
